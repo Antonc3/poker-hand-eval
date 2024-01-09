@@ -49,7 +49,20 @@ pair<int,int> handStrength(vector<int> hand){
         if(hand[i]%SUITS != hand[0]%SUITS) flush = 0;
         if(i > 0 && hand[i]/SUITS != hand[i-1]/SUITS+1) straight = 0;
         seen[hand[i]/SUITS]++;
-        relStrength = relStrength*NUMS+hand[i]/SUITS;
+    }
+    vector<int> strengths(SUITS+1,0);
+    vector<int> cnt(SUITS+1,0);
+    for(int i = 1; i <= NUMS; i++){
+        for(int j = 1; j<=SUITS; j++){
+            if(seen[i%NUMS] == j){
+                if(i==NUMS) strengths[j] = NUMS*fastpow(NUMS+1,cnt[j]++,MOD);
+                else strengths[j] = i*fastpow(NUMS+1,cnt[j]++,MOD);
+            }
+        }
+    }
+    relStrength = 0;
+    for(int i = SUITS; i > 0; i--){
+        relStrength=relStrength*((i==1) ? fastpow(NUMS+1,4,MOD) : (NUMS+1))+strengths[i];
     }
     if(flush && straight){
         return {9,relStrength};
@@ -68,26 +81,10 @@ pair<int,int> handStrength(vector<int> hand){
         return {10,0};
     }
     if(flush){
-        if(hand[0]/4==0) relStrength = NUMS;
-        else relStrength = hand.back()/4;
         return {6,relStrength};
     }
     if(straight){
         return {5,13};
-    }
-    vector<int> strengths(SUITS+1,0);
-    vector<int> cnt(SUITS+1,0);
-    for(int i = 1; i <= NUMS; i++){
-        for(int j = 1; j<=SUITS; j++){
-            if(seen[i%NUMS] == j){
-                if(i==NUMS) strengths[j] = NUMS*fastpow(NUMS+1,cnt[j]++,MOD);
-                else strengths[j] = i*fastpow(NUMS+1,cnt[j]++,MOD);
-            }
-        }
-    }
-    relStrength = 0;
-    for(int i = SUITS; i > 0; i--){
-        relStrength=relStrength*((i==1) ? fastpow(NUMS+1,4,MOD) : (NUMS+1))+strengths[i];
     }
     if(cnt[4] != 0){
         return {8,relStrength};
@@ -270,7 +267,7 @@ int readCard(){
         string numb;
         cin >> numb;
         if(wordToNumNum.count(numb) != 0){
-            numb = wordToSuitNum[numb];
+            num = wordToNumNum[numb];
             break;
         }
         try{
@@ -284,6 +281,8 @@ int readCard(){
     }
     num--;
     debug(num*SUITS+st);
+    assert(num*SUITS+st>=0);
+    assert(num*SUITS+st<SUITS*NUMS);
     return num*SUITS + st;
 
 }
